@@ -13,7 +13,9 @@ COPY . .
 
 RUN go build -o pryx main.go
  
-FROM ubuntu:latest AS run
+FROM ubuntu:24.04 AS run
+
+RUN apt update && apt install ca-certificates -y
 
 # Copy the application executable from the build image
 COPY --from=build /app/pryx /app/pryx
