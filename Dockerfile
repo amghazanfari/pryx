@@ -11,7 +11,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o pryx main.go
+RUN go build -o pryx cmd/app/main.go
  
 FROM ubuntu:24.04 AS run
 
