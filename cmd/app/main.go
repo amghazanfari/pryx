@@ -1,15 +1,16 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 
-	"github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/option"
+	"pryx/config"
 	"pryx/internal/db"
+	"pryx/internal/handlers"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 var (
@@ -32,51 +33,33 @@ func init() {
 	log.SetLevel(lvl)
 }
 
-
 func main() {
-	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/postgres?sslmode=disable",
-		POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT)
-
-	conn, err := db.Connect(dsn)
+	db_cfg := config.DBFromEnv()
+	conn, err := db.Open(db_cfg)
 	if err != nil {
 		log.WithError(err).Fatal("db connect failed")
 	}
-	defer conn.Close()
+	// sqlDB, _ := db.DB()
+	// defer sqlDB.Close()
 
-	http.HandleFunc("/", handler)
+	h := handlers.New(conn)
+	r := chi.NewRouter()
 
-	log.WithField("port", 8080).Info("starting server")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.WithError(err).Fatal("http server stopped")
-	}
-}
+	r.Use(middleware.Logger)
+	r.Get("/", handlers.CompletionHandler)
+	r.Post("/models", h.AddModelHandler())
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	log.WithFields(log.Fields{
-		"method": r.Method,
-		"path":   r.URL.Path,
-	}).Info("incoming request")
+	// srv := &http.Server{
+	// 	Addr:         ":8080",
+	// 	Handler:      mux,
+	// 	ReadTimeout:  5 * time.Second,
+	// 	WriteTimeout: 10 * time.Second,
+	// 	IdleTimeout:  60 * time.Second,
+	// }
 
-	promptMessage := "hello"
-	client := openai.NewClient(
-		option.WithAPIKey(API_KEY),
-		option.WithBaseURL("https://openrouter.ai/api/v1"),
-	)
-
-	chatCompletion, err := client.Chat.Completions.New(r.Context(), openai.ChatCompletionNewParams{
-		Messages: []openai.ChatCompletionMessageParamUnion{
-			openai.UserMessage(promptMessage),
-		},
-		Model: "deepseek/deepseek-chat-v3-0324:free",
-	})
-	if err != nil {
-		log.WithError(err).Error("chat completion failed")
-		http.Error(w, "upstream error", http.StatusBadGateway)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(chatCompletion); err != nil {
-		log.WithError(err).Error("write response failed")
-	}
+	// log.Println("listening on :8080")
+	// if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+	// 	log.Fatalf("server died: %v", err)
+	// }
+	http.ListenAndServe(":8080", r)
 }
