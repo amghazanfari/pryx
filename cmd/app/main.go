@@ -23,7 +23,6 @@ var (
 )
 
 func init() {
-	// JSON logs to stdout, level from env
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
 
@@ -40,8 +39,6 @@ func main() {
 	if err != nil {
 		log.WithError(err).Fatal("db connect failed")
 	}
-	// sqlDB, _ := db.DB()
-	// defer sqlDB.Close()
 
 	h := handlers.New(conn)
 	r := chi.NewRouter()

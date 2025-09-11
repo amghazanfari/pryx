@@ -11,7 +11,7 @@ import (
 )
 
 // Open opens a *gorm.DB with pool tuning and a sanity ping.
-// You own the lifecycle; close it in main via sqlDB.Close().
+// TODO You own the lifecycle; close it in main via sqlDB.Close().
 func Open(cfg config.DBConfig) (*gorm.DB, error) {
 	db, err := gorm.Open(postgres.Open(cfg.DSN()), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
