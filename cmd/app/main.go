@@ -19,6 +19,7 @@ var (
 	POSTGRES_PASSWORD = os.Getenv("POSTGRES_PASSWORD")
 	POSTGRES_HOST     = os.Getenv("POSTGRES_HOST")
 	POSTGRES_PORT     = os.Getenv("POSTGRES_PORT")
+	DB_AUTOMIGRATE    = os.Getenv("DB_AUTOMIGRATE")
 )
 
 func init() {
@@ -48,6 +49,13 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Get("/", handlers.CompletionHandler)
 	r.Post("/models", h.AddModelHandler())
+
+	if DB_AUTOMIGRATE == "true" {
+		if err := db.AutoMigrateAll(conn); err != nil {
+			log.WithError(err).Fatal("auto-migrate failed")
+		}
+		log.Info("auto-migrate completed")
+	}
 
 	// srv := &http.Server{
 	// 	Addr:         ":8080",
