@@ -47,7 +47,7 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
-	r.Get("/", handlers.CompletionHandler)
+	r.Post("/", h.CompletionHandler())
 	r.Post("/models", h.AddModelHandler())
 
 	if DB_AUTOMIGRATE == "true" {
@@ -57,17 +57,5 @@ func main() {
 		log.Info("auto-migrate completed")
 	}
 
-	// srv := &http.Server{
-	// 	Addr:         ":8080",
-	// 	Handler:      mux,
-	// 	ReadTimeout:  5 * time.Second,
-	// 	WriteTimeout: 10 * time.Second,
-	// 	IdleTimeout:  60 * time.Second,
-	// }
-
-	// log.Println("listening on :8080")
-	// if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-	// 	log.Fatalf("server died: %v", err)
-	// }
 	http.ListenAndServe(":8080", r)
 }

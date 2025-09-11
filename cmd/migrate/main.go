@@ -25,7 +25,9 @@ func m0001() *gormigrate.Migration {
 func main() {
 	cfg := config.DBFromEnv()
 	conn, err := db.Open(cfg)
-	if err != nil { log.Fatal(err) }
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	m := gormigrate.New(conn, gormigrate.DefaultOptions, []*gormigrate.Migration{
 		m0001(),
