@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"pryx/config"
+	"pryx/internal/auth"
 	"pryx/internal/db"
 	"pryx/internal/handlers"
-	"pryx/internal/auth"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -46,19 +46,22 @@ func main() {
 
 	r.Use(middleware.Logger)
 
-	r.Post("/admin/users", h.CreateUser())
-	r.Post("/admin/keys", h.CreateAPIKey())
+	admin := chi.NewRouter()
+	admin.Use(auth.SharedSecretMiddleware(os.Getenv("ADMIN_SECRET"))) // or mTLS/IP allowlist
+	admin.Post("/users", h.CreateUser())
+	admin.Post("/keys", h.CreateAPIKey())
 
 	protected := chi.NewRouter()
 
 	protected.Use(auth.Middleware(conn, "completion:invoke"))
-	protected.Post("/", h.CompletionHandler())
+	protected.Post("/completions", h.CompletionHandler())
 
 	modelsRouter := chi.NewRouter()
 	modelsRouter.Use(auth.Middleware(conn, "model:write"))
 	modelsRouter.Post("/", h.AddModelHandler())
 
-	r.Mount("/", protected)
+	r.Mount("/v1", protected)
+	r.Mount("/admin", admin)
 	r.Mount("/models", modelsRouter)
 
 	if DB_AUTOMIGRATE == "true" {
