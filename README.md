@@ -38,7 +38,7 @@ curl -s http://localhost:8080/admin/keys \
 Call the service:
 
 ```bash
-curl -s http://localhost:8080/ \
+curl -s http://localhost:8080/v1/completions \
   -H "Authorization: Bearer sk_live_..." \
   -H "Content-Type: application/json" \
   -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Hello"}]}'
@@ -46,7 +46,7 @@ curl -s http://localhost:8080/ \
 
 ## Documentation
 
-* [Architecture](docs/ARCHITECTURE.md)
-* [Authentication](docs/AUTHENTICATION.md)
-* [Database](docs/DATABASE.md)
-* [Usage](docs/USAGE.md)
+* [Architecture](docs/Architecture.md)
+* [Authentication](docs/Authentication.md)
+* [Database](docs/Database.md)
+* [Usage](docs/Usage.md)
