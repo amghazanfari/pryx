@@ -1,0 +1,43 @@
+name: Release Binaries
+
+on:
+  push:
+    tags: [ "v*" ]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+          cache: true
+
+      - name: Build linux/amd64 binaries
+        env:
+          CGO_ENABLED: 0
+          GOOS: linux
+          GOARCH: amd64
+        run: |
+          mkdir -p dist
+          go build -o dist/pryx cmd/app/main.go
+          go build -o dist/migrate cmd/migrate/main.go
+          tar -C dist -czf pryx_linux_amd64.tar.gz pryx migrate
+          shasum -a 256 pryx_linux_amd64.tar.gz > pryx_linux_amd64.tar.gz.sha256
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: false
+          files: |
+            pryx_linux_amd64.tar.gz
+            pryx_linux_amd64.tar.gz.sha256
