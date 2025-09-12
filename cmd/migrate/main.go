@@ -22,6 +22,21 @@ func m0001() *gormigrate.Migration {
 	}
 }
 
+func m0002() *gormigrate.Migration {
+	return &gormigrate.Migration{
+		ID: "0002_users_apikeys",
+		Migrate: func(tx *gorm.DB) error {
+			return tx.AutoMigrate(&models.User{}, &models.APIKey{} , &models.ModelAccess{})
+		},
+		Rollback: func(tx *gorm.DB) error {
+			if err := tx.Migrator().DropTable(&models.ModelAccess{}); err != nil { return err }
+			if err := tx.Migrator().DropTable(&models.APIKey{}); err != nil { return err }
+			if err := tx.Migrator().DropTable(&models.User{}); err != nil { return err }
+			return nil
+		},
+	}
+}
+
 func main() {
 	cfg := config.DBFromEnv()
 	conn, err := db.Open(cfg)
@@ -31,6 +46,7 @@ func main() {
 
 	m := gormigrate.New(conn, gormigrate.DefaultOptions, []*gormigrate.Migration{
 		m0001(),
+		m0002(),
 	})
 	if err := m.Migrate(); err != nil {
 		log.Fatal(err)

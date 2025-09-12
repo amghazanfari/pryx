@@ -8,6 +8,7 @@ import (
 	"pryx/config"
 	"pryx/internal/db"
 	"pryx/internal/handlers"
+	"pryx/internal/auth"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -44,8 +45,21 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
-	r.Post("/", h.CompletionHandler())
-	r.Post("/models", h.AddModelHandler())
+
+	r.Post("/admin/users", h.CreateUser())
+	r.Post("/admin/keys", h.CreateAPIKey())
+
+	protected := chi.NewRouter()
+
+	protected.Use(auth.Middleware(conn, "completion:invoke"))
+	protected.Post("/", h.CompletionHandler())
+
+	modelsRouter := chi.NewRouter()
+	modelsRouter.Use(auth.Middleware(conn, "model:write"))
+	modelsRouter.Post("/", h.AddModelHandler())
+
+	r.Mount("/", protected)
+	r.Mount("/models", modelsRouter)
 
 	if DB_AUTOMIGRATE == "true" {
 		if err := db.AutoMigrateAll(conn); err != nil {
