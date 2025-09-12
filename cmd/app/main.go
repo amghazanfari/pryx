@@ -47,7 +47,8 @@ func main() {
 	r.Use(middleware.Logger)
 
 	admin := chi.NewRouter()
-	admin.Use(auth.SharedSecretMiddleware(os.Getenv("ADMIN_SECRET"))) // or mTLS/IP allowlist
+	admin.Use(auth.IPAllowlistMiddlewareFromEnv())
+	admin.Use(auth.SharedSecretMiddleware(os.Getenv("ADMIN_SECRET")))
 	admin.Post("/users", h.CreateUser())
 	admin.Post("/keys", h.CreateAPIKey())
 
