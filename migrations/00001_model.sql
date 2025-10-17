@@ -11,5 +11,5 @@ CREATE TABLE model (
 
 -- +goose Down
 -- +goose StatementBegin
-DROP DATABASE model;
+DROP TABLE model;
 -- +goose StatementEnd

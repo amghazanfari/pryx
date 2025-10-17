@@ -13,5 +13,5 @@ CREATE TABLE endpoint (
 
 -- +goose Down
 -- +goose StatementBegin
-DROP DATABASE endpoint;
+DROP TABLE endpoint;
 -- +goose StatementEnd

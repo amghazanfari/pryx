@@ -62,3 +62,28 @@ func MigrateFS(db *sql.DB, migrationFS fs.FS, dir string) error {
 
 	return Migrate(db, dir)
 }
+
+func TearDownDB(db *sql.DB, migrationFS fs.FS, dir string) error {
+	goose.SetBaseFS(migrationFS)
+	defer func() {
+		goose.SetBaseFS(nil)
+	}()
+
+	migrations, err := goose.CollectMigrations(dir, 0, goose.MaxVersion)
+	if err != nil {
+		return fmt.Errorf("failed to collect migrations: %w", err)
+	}
+
+	if len(migrations) == 0 {
+		return nil
+	}
+
+	for i := len(migrations) - 1; i >= 0; i-- {
+		m := migrations[i]
+		if err := goose.DownTo(db, dir, m.Version-1); err != nil {
+			return fmt.Errorf("failed to rollback migration %d: %w", m.Version, err)
+		}
+	}
+
+	return nil
+}
