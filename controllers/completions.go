@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/amghazanfari/pryx/models"
+	"github.com/amghazanfari/pryx/utils"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
 )
@@ -55,7 +56,9 @@ func (cc ChatCompletion) Completion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	endpoint := (*endpoints)[0]
+	endpointIndex := utils.CreateRandomInt(0, len(*endpoints))
+
+	endpoint := (*endpoints)[endpointIndex]
 
 	client := openai.NewClient(
 		option.WithAPIKey(endpoint.APIKey),
