@@ -57,3 +57,37 @@ func (es *EndpointService) ListByModel(modelName string) (*[]Endpoint, error) {
 
 	return &endpoints, nil
 }
+
+func (es *EndpointService) List() (*[]Endpoint, error) {
+	var endpoints []Endpoint
+
+	rows, err := es.DB.Query(`
+	SELECT name, created_at, model_id, url_address, object FROM endpoint
+	`)
+
+	if err != nil {
+		return nil, fmt.Errorf("error getting list of models: %w", err)
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		ep := Endpoint{}
+		var modelID int
+		err = rows.Scan(&ep.Name, &ep.CreatedAt, &modelID, &ep.URLAdress, &ep.Object)
+		if err != nil {
+			return nil, fmt.Errorf("error getting list of endpoints: %w", err)
+		}
+		ep.Timestamp = ep.CreatedAt.Unix()
+		row := es.DB.QueryRow(`
+		SELECT name FROM model
+		WHERE id = $1
+		`, modelID)
+		err = row.Scan(&ep.OwnedBy)
+		if err != nil {
+			return nil, fmt.Errorf("error getting list of endpoints: %w", err)
+		}
+		endpoints = append(endpoints, ep)
+	}
+
+	return &endpoints, nil
+}
