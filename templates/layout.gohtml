@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pryx — Dashboard</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #071428;
+    --glass: rgba(255,255,255,0.04);
+    --card: rgba(255,255,255,0.03);
+    --muted: rgba(255,255,255,0.6);
+    --accent: #3b9aff;
+    --accent-2: linear-gradient(135deg,#3b9aff,#26d3ff);
+    --success: #00c853;
+    --danger: #ff5252;
+    --radius: 12px;
+    --glass-blur: 8px;
+    --text: #eaf2ff;
+  }
+
+  body.light{
+    --bg: linear-gradient(180deg,#f6f9ff,#eef4ff);
+    --glass: rgba(10,20,40,0.03);
+    --card: rgba(255,255,255,0.95);
+    --muted: #4b5563;
+    --accent: #007BFF;
+    --text: #0b1a2b;
+  }
+
+  /* Base layout */
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:"Rubik",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+    background: var(--bg);
+    color:var(--text);
+    display:flex;
+    transition: background 300ms ease, color 300ms ease;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* subtle background patterns */
+  body::before{
+    content:"";
+    position:fixed;inset:0;
+    background:
+      radial-gradient(600px 600px at 10% 10%, rgba(59,154,255,0.06), transparent 12%),
+      radial-gradient(500px 500px at 90% 80%, rgba(38,211,255,0.035), transparent 10%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* container */
+  .app {
+    display:grid;
+    grid-template-columns: 260px 1fr;
+    gap:28px;
+    width:100%;
+    padding:32px;
+    align-items:start;
+    z-index:1;
+  }
+
+  /* SIDEBAR */
+  .sidebar{
+    position:relative;
+    height:calc(100vh - 64px);
+    border-radius:var(--radius);
+    padding:20px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    backdrop-filter: blur(var(--glass-blur));
+    box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .logo{
+    width:46px;height:46px;border-radius:10px;
+    background:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    color:white;font-weight:700;font-size:18px;box-shadow: 0 8px 20px rgba(59,154,255,0.14);
+  }
+  .app-name{font-weight:700; font-size:15px; letter-spacing:0.1px; color:var(--text)}
+  .app-sub{font-size:12px;color:var(--muted)}
+
+  nav.menu{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+  nav.menu a{
+    display:flex;align-items:center;gap:12px;
+    padding:10px 12px;border-radius:10px;
+    text-decoration:none;color:var(--text);font-weight:500;
+    background:transparent;transition:all 180ms ease;
+  }
+  nav.menu a .ic{
+    width:36px;height:36;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,0.02)
+  }
+  nav.menu a:hover{transform:translateX(6px);background:rgba(255,255,255,0.02)}
+  nav.menu a.active{
+    background: linear-gradient(90deg, rgba(59,154,255,0.12), rgba(38,211,255,0.05));
+    border-left: 3px solid var(--accent);
+  }
+
+  .sidebar .spacer{flex:1}
+  .sidebar .footer{font-size:12px;color:var(--muted); text-align:center}
+
+  /* MAIN */
+  .main {
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    z-index:1;
+  }
+
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:center;
+  }
+
+  .search{
+    flex:1;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    background:var(--card);
+    padding:4px 12px;
+    border-radius:12px;
+    min-width:220px;max-width:760px; box-shadow: 0 6px 20px rgba(2,6,23,0.35);
+    backdrop-filter: blur(var(--glass-blur));
+  }
+  .search input{
+    border:0;
+    background:transparent;
+    color:var(--text);font-size:14px;
+    outline:none;
+    width:100%;
+  }
+  .top-actions{display:flex;gap:12px;align-items:center}
+
+  .btn {
+    background:var(--accent);
+    color:white;padding:10px 14px;border-radius:10px;border:0;font-weight:600;
+    cursor:pointer; display:inline-flex;gap:10px;align-items:center;box-shadow:0 10px 30px rgba(59,154,255,0.12);
+    transition:transform 140ms ease, box-shadow 140ms ease;
+  }
+  .btn.secondary{
+    background:transparent;color:var(--text);border:1px solid rgba(255,255,255,0.04);box-shadow:none;font-weight:600;
+  }
+  .btn:active{transform:translateY(1px)}
+
+  /* content card */
+  .card{
+    border-radius:14px;
+    padding:18px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    backdrop-filter: blur(calc(var(--glass-blur) - 2px));
+    box-shadow: 0 10px 40px rgba(2,6,23,0.55);
+    overflow:auto;
+    margin-top: 20px;
+  }
+
+  /* table */
+  table{width:100%;border-collapse:collapse;min-width:900px}
+  thead th{
+    font-weight:600;font-size:13px;color:var(--muted);text-align:left;padding:12px 16px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+  }
+  tbody tr{
+    transition: background 160ms ease, transform 160ms ease;
+  }
+  tbody tr:hover{ background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); transform: translateY(-3px); }
+  td{ padding:14px 16px; font-size:14px; color:var(--text); vertical-align: middle; }
+
+  .row-title{ display:flex; gap:12px; align-items:center; }
+  .avatar-sm{width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,#3b9aff,#26d3ff);display:grid;place-items:center;color:white;font-weight:700}
+  .muted{ color:var(--muted); font-size:13px }
+
+  .badge{
+    display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700;font-size:13px;
+  }
+  .badge.active{ background: linear-gradient(90deg,#07c16b,#00d68a); color:#042a14 }
+  .badge.inactive{ background:rgba(255,255,255,0.03); color:var(--muted) }
+
+  .actions{ display:flex; gap:8px; align-items:center; }
+  .icon-btn{ width:38px;height:38;border-radius:8px;border:0;background:rgba(255,255,255,0.02);display:grid;place-items:center;cursor:pointer; color:var(--text) }
+  .icon-btn:hover{ transform:translateY(-4px); box-shadow:0 6px 18px rgba(0,0,0,0.35) }
+
+  .meta-grid{ display:flex; gap:12px; align-items:center }
+  .meta-item{ background:rgba(255,255,255,0.02); padding:10px 12px; border-radius:10px; min-width:120px; text-align:center }
+  .meta-item .num{ font-weight:700; font-size:18px }
+
+  .modal{
+    position:fixed;
+     inset:0; 
+    display:flex; 
+    align-items:center;
+     justify-content:center;
+    background:rgba(2,6,23,0.6); 
+    visibility:hidden; 
+    opacity:0; transition:opacity 300ms ease, visibility 300ms;
+    z-index:60;
+  }
+  .modal.show{ visibility:visible; opacity:1 }
+  .modal-card{
+    width:720px; max-width:92%; border-radius:14px; padding:26px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    backdrop-filter: blur(calc(var(--glass-blur) + 2px)); transform: translateY(-18px); transition: transform 320ms ease;
+    box-shadow: 0 30px 70px rgba(2,6,23,0.6);
+  }
+  .modal.show .modal-card{ transform: translateY(0) }
+
+  .modal-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px }
+  .field{ display:flex; flex-direction:column; gap:8px; }
+  label{ font-size:13px; color:var(--muted) }
+  input,select{
+    padding:12px 14px; border-radius:10px; border:0; background: rgba(255,255,255,0.02); color:var(--text); outline:none;
+  }
+  .modal-footer{ display:flex; justify-content:flex-end; gap:12px; margin-top:16px }
+
+  /* small screens */
+  @media (max-width:1000px){
+    .app{ grid-template-columns: 1fr; padding:18px; }
+    .sidebar{ height:auto; display:flex; flex-direction:row; gap:12px; align-items:center; padding:12px; border-radius:14px }
+    .sidebar nav.menu{ display:none }
+    .main { padding-top:12px; }
+    table{ min-width:700px }
+  }
+
+</style>
+</head>
+<body>
+  {{template "page" .}}
+</body>
+</html>
