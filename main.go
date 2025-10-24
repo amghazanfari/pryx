@@ -130,6 +130,7 @@ func main() {
 		SessionService:       &sessionService,
 		PasswordResetService: &pwResetService,
 		EmailService:         emailService,
+		EndpointService:      &endpointService,
 	}
 
 	ModelListTpl, err := views.ParseFS(templates.FS, "layout.gohtml", "proxy-list.gohtml")

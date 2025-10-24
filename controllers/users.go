@@ -23,6 +23,7 @@ type Users struct {
 	SessionService       *models.SessionService
 	PasswordResetService *models.PasswordResetService
 	EmailService         *models.EmailService
+	EndpointService      *models.EndpointService
 }
 
 func (u Users) SignUp(w http.ResponseWriter, r *http.Request) {
@@ -243,5 +244,15 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) ModelList(w http.ResponseWriter, r *http.Request) {
-	u.Templates.ModelList.Execute(w, r, nil)
+	var data struct {
+		Endpoints *[]models.Endpoint
+	}
+	var err error
+	data.Endpoints, err = u.EndpointService.List()
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		return
+	}
+	u.Templates.ModelList.Execute(w, r, data)
 }

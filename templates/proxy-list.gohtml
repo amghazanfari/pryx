@@ -134,22 +134,22 @@
             </tr>
           </thead>
           <tbody>
-            <!-- Row 1 -->
+            {{range .Endpoints}}
             <tr>
               <td>
                 <div class="row-title">
                   <div class="avatar-sm">G4</div>
                   <div>
-                    <div style="font-weight:700">gpt-4</div>
+                    <div style="font-weight:700">{{.OwnedBy}}</div>
                     <div class="muted">Model ID</div>
                   </div>
                 </div>
               </td>
               <td>OpenAI</td>
-              <td class="muted">hosted_vllm/gpt-4</td>
-              <td class="muted">http://192.168.1.200</td>
-              <td>$0.03</td>
-              <td>$0.06</td>
+              <td class="muted">{{.Name}}</td>
+              <td class="muted">{{.URLAdress}}</td>
+              <td></td>
+              <td></td>
               <td><span class="badge active">Active</span></td>
               <td>
                 <div class="actions">
@@ -186,59 +186,9 @@
                 </div>
               </td>
             </tr>
+            {{end}}
 
-            <!-- Row 2 -->
-            <tr>
-              <td>
-                <div class="row-title">
-                  <div class="avatar-sm">G4</div>
-                  <div>
-                    <div style="font-weight:700">gpt-4</div>
-                    <div class="muted">Model ID</div>
-                  </div>
-                </div>
-              </td>
-              <td>SomeProvider</td>
-              <td class="muted">hosted_vllm/gpt-4</td>
-              <td class="muted">http://192.168.1.201</td>
-              <td>$0.04</td>
-              <td>$0.08</td>
-              <td><span class="badge inactive">Inactive</span></td>
-              <td>
-                <div class="actions">
-                  <button class="icon-btn" title="Edit"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <g clip-path="url(#clip0_1_29576)">
-                      <path d="M5 16L4 20L8 19L19.5858 7.41421C20.3668 6.63316 20.3668 5.36683 19.5858 4.58579L19.4142 4.41421C18.6332 3.63316 17.3668 3.63317 16.5858 4.41421L5 16Z" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="M15 6L18 9" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="M13 20H21" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
-                      </g>
-                      <defs>
-                      <clipPath id="clip0_1_29576">
-                      <rect width="20" height="20" fill="white"/>
-                      </clipPath>
-                      </defs>
-                      </svg>
-                      </button>
-                  <button class="icon-btn" title="Delete">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <g clip-path="url(#clip0_1_29544)">
-                          <path d="M14 11V17" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M10 11V17" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M6 7V19C6 20.1046 6.89543 21 8 21H16C17.1046 21 18 20.1046 18 19V7" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M4 7H20" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M7 7L9 3H15L17 7" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
-                          </g>
-                          <defs>
-                          <clipPath id="clip0_1_29544">
-                          <rect width="20" height="20" fill="white"/>
-                          </clipPath>
-                          </defs>
-                          </svg>
-
-                  </button>
-                </div>
-              </td>
-            </tr>
+            
 
           </tbody>
         </table>
