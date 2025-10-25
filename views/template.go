@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/fs"
 	"net/http"
+	"strings"
 
 	"github.com/amghazanfari/pryx/context"
 	"github.com/amghazanfari/pryx/models"
@@ -26,6 +27,12 @@ func ParseFS(fs fs.FS, pattern ...string) (Template, error) {
 			},
 			"currentUser": func() (template.HTML, error) {
 				return "", fmt.Errorf("currentUser not implemented")
+			},
+			"firstCharCap": func() (template.HTML, error) {
+				return "", fmt.Errorf("firstChar not implemented")
+			},
+			"showPrice": func() (template.HTML, error) {
+				return "", fmt.Errorf("showPrice not implemented")
 			},
 		},
 	)
@@ -53,6 +60,19 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 			},
 			"currentUser": func() *models.User {
 				return context.User(r.Context())
+			},
+			"firstCharCap": func(s string) string {
+				r := []rune(s)
+				return strings.ToUpper(string(r[0]))
+			},
+			"showPrice": func(price float32) string {
+				var priceS string
+				if price == 0 {
+					priceS = "free"
+				} else {
+					priceS = fmt.Sprintf("%.2f$/M tokens", price)
+				}
+				return priceS
 			},
 		},
 	)

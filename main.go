@@ -141,7 +141,6 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	r.Use(csrfMw)
 	r.Use(umw.SetUser)
 
 	r.Route("/v1/models", func(r chi.Router) {
@@ -156,6 +155,7 @@ func main() {
 		r.Get("/", chatCompletionC.Completion)
 	})
 	r.Route("/ui", func(r chi.Router) {
+		r.Use(csrfMw)
 		r.Get("/models", userC.ModelList)
 	})
 

@@ -20,7 +20,7 @@ type ModelService struct {
 	DB *sql.DB
 }
 
-func (es *ModelService) Create(modelName, endpointName, apiKey, urlAddress string) (*Model, error) {
+func (es *ModelService) Create(modelName, endpointName, apiKey, urlAddress string, input_price, output_price float32, active bool) (*Model, error) {
 	model := Model{
 		Name: modelName,
 	}
@@ -48,15 +48,18 @@ func (es *ModelService) Create(modelName, endpointName, apiKey, urlAddress strin
 	}
 
 	endpoint := Endpoint{
-		Name:      endpointName,
-		APIKey:    apiKey,
-		URLAdress: urlAddress,
+		Name:        endpointName,
+		APIKey:      apiKey,
+		URLAdress:   urlAddress,
+		InputPrice:  input_price,
+		OutputPrice: output_price,
+		Active:      active,
 	}
 
 	_, err = es.DB.Query(`
-	INSERT INTO endpoint (name, api_key, url_address, model_id)
-	VALUES ($1, $2, $3, $4)
-	`, endpoint.Name, endpoint.APIKey, endpoint.URLAdress, model.ID)
+	INSERT INTO endpoint (name, api_key, url_address, model_id, input_price, output_price, active)
+	VALUES ($1, $2, $3, $4, $5, $6, $7)
+	`, endpoint.Name, endpoint.APIKey, endpoint.URLAdress, model.ID, endpoint.InputPrice, endpoint.OutputPrice, endpoint.Active)
 
 	if err != nil {
 		return nil, fmt.Errorf("error while create endpoint: %w", err)

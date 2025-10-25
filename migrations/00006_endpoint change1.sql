@@ -1,0 +1,13 @@
+-- +goose Up
+ALTER TABLE endpoint
+ADD COLUMN input_price  DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN output_price DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN active       BOOLEAN NOT NULL DEFAULT TRUE;
+
+UPDATE endpoint SET active = TRUE WHERE active IS FALSE;
+
+-- +goose Down
+ALTER TABLE endpoint
+DROP COLUMN active,
+DROP COLUMN output_price,
+DROP COLUMN input_price;

@@ -138,19 +138,18 @@
             <tr>
               <td>
                 <div class="row-title">
-                  <div class="avatar-sm">G4</div>
+                  <div class="avatar-sm">{{firstCharCap .OwnedBy}}</div>
                   <div>
                     <div style="font-weight:700">{{.OwnedBy}}</div>
-                    <div class="muted">Model ID</div>
                   </div>
                 </div>
               </td>
               <td>OpenAI</td>
               <td class="muted">{{.Name}}</td>
               <td class="muted">{{.URLAdress}}</td>
-              <td></td>
-              <td></td>
-              <td><span class="badge active">Active</span></td>
+              <td>{{showPrice .InputPrice}}</td>
+              <td>{{showPrice .OutputPrice}}</td>
+              <td><span class="badge active">{{.Active}}</span></td>
               <td>
                 <div class="actions">
                   <button class="icon-btn" title="Edit"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -14,10 +14,13 @@ type Model struct {
 }
 
 type ModelCreateRequest struct {
-	ModelName    string `json:"model_name"`
-	EndpointName string `json:"endpoint_name"`
-	APIKey       string `json:"api_key"`
-	URLAdress    string `json:"url_address"`
+	ModelName    string  `json:"model_name"`
+	EndpointName string  `json:"endpoint_name"`
+	APIKey       string  `json:"api_key"`
+	URLAdress    string  `json:"url_address"`
+	InputPrice   float32 `json:"input_price,omitempty"`
+	OutputPrice  float32 `json:"output_price,omitempty"`
+	Active       bool    `json:"active,omitempty"`
 }
 
 type ModelCreateResponse struct {
@@ -62,7 +65,7 @@ func (e Model) Create(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	model, err := e.ModelService.Create(ep.ModelName, ep.EndpointName, ep.APIKey, ep.URLAdress)
+	model, err := e.ModelService.Create(ep.ModelName, ep.EndpointName, ep.APIKey, ep.URLAdress, ep.InputPrice, ep.OutputPrice, ep.Active)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
