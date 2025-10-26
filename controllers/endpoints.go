@@ -16,6 +16,10 @@ type EndpointListResponse struct {
 	Data   *[]models.Endpoint `json:"data"`
 }
 
+type EndpointDeleteResponse struct {
+	Message string `json:"object"`
+}
+
 func (e Endpoint) List(w http.ResponseWriter, r *http.Request) {
 	var endpoints *[]models.Endpoint
 
@@ -27,17 +31,41 @@ func (e Endpoint) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	modelResponse := EndpointListResponse{
+	endpointResponse := EndpointListResponse{
 		Object: "list",
 		Data:   endpoints,
 	}
 
-	modelResponseBytes, err := json.Marshal(modelResponse)
+	endpintResponseBytes, err := json.Marshal(endpointResponse)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	w.Write(modelResponseBytes)
+	w.Write(endpintResponseBytes)
+
+}
+
+func (e Endpoint) Delete(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	id := r.URL.Query().Get("id")
+	err := e.EndpointService.Delete(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	deleteResponse := EndpointDeleteResponse{
+		Message: "the endpoint deleted successfully",
+	}
+
+	endpointResponseBytes, err := json.Marshal(deleteResponse)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Write(endpointResponseBytes)
 
 }

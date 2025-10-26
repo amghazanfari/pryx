@@ -34,6 +34,12 @@ func ParseFS(fs fs.FS, pattern ...string) (Template, error) {
 			"showPrice": func() (template.HTML, error) {
 				return "", fmt.Errorf("showPrice not implemented")
 			},
+			"sumActive": func() (template.HTML, error) {
+				return "", fmt.Errorf("sumActive not implemented")
+			},
+			"sumInActive": func() (template.HTML, error) {
+				return "", fmt.Errorf("sumInActive not implemented")
+			},
 		},
 	)
 	tpl, err := tpl.ParseFS(fs, pattern...)
@@ -73,6 +79,24 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 					priceS = fmt.Sprintf("%.2f$/M tokens", price)
 				}
 				return priceS
+			},
+			"sumActive": func(eps []models.Endpoint) int {
+				count := 0
+				for _, e := range eps {
+					if e.Active {
+						count++
+					}
+				}
+				return count
+			},
+			"sumInActive": func(eps []models.Endpoint) int {
+				count := 0
+				for _, e := range eps {
+					if !e.Active {
+						count++
+					}
+				}
+				return count
 			},
 		},
 	)

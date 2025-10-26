@@ -150,6 +150,7 @@ func main() {
 	})
 	r.Route("/v1/endpoints", func(r chi.Router) {
 		r.Get("/", endpointC.List)
+		r.Delete("/", endpointC.Delete)
 	})
 	r.Route("/v1/chat/completions", func(r chi.Router) {
 		r.Get("/", chatCompletionC.Completion)

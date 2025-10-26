@@ -79,8 +79,8 @@
       <div style="display:flex;gap:16px;align-items:center;">
         <h1 style="margin:0;font-size:20px;font-weight:700">Proxy Management</h1>
         <div class="meta-grid" style="margin-left:10px">
-          <div class="meta-item"><div class="num">12</div><small class="muted">Active</small></div>
-          <div class="meta-item"><div class="num">3</div><small class="muted">Inactive</small></div>
+          <div class="meta-item"><div class="num">{{sumActive .Endpoints}}</div><small class="muted">Active</small></div>
+          <div class="meta-item"><div class="num">{{sumInActive .Endpoints}}</div><small class="muted">Inactive</small></div>
         </div>
       </div>
 
@@ -165,7 +165,7 @@
                           </defs>
                           </svg>
                           </button>
-                  <button class="icon-btn" title="Delete">
+                  <button type="button" onclick="deleteEndpoint('{{.ID}}')" class="icon-btn" title="Delete">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <g clip-path="url(#clip0_1_29544)">
                           <path d="M14 11V17" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
@@ -180,8 +180,8 @@
                           </clipPath>
                           </defs>
                           </svg>
+                          </button>
 
-                  </button>
                 </div>
               </td>
             </tr>
@@ -261,6 +261,24 @@
     modal.setAttribute('aria-hidden','false');
     document.getElementById('modelName').focus();
   });
+  function deleteEndpoint(id) {
+    if(!confirm("Are you sure you want to delete this?")) return;
+
+    fetch(`/v1/endpoints?id=${id}`, {
+        method: 'DELETE',
+        redirect: 'follow'
+    })
+    .then(res => {
+        if(res.ok) {
+            alert("endpoint deleted");
+            window.location.href = '/ui/models';
+
+        } else {
+            alert("Failed to delete endpoint");
+        }
+    })
+    .catch(err => alert("Error: " + err));
+  }
   function hideModal(){
     modal.classList.remove('show');
     modal.setAttribute('aria-hidden','true');
