@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/amghazanfari/pryx/models"
 )
@@ -17,8 +19,8 @@ type ModelCreateRequest struct {
 	EndpointName string  `json:"endpoint_name"`
 	APIKey       string  `json:"api_key"`
 	URLAdress    string  `json:"url_address"`
-	InputPrice   float32 `json:"input_price,omitempty"`
-	OutputPrice  float32 `json:"output_price,omitempty"`
+	InputPrice   float64 `json:"input_price,omitempty"`
+	OutputPrice  float64 `json:"output_price,omitempty"`
 	Active       bool    `json:"active,omitempty"`
 }
 
@@ -54,6 +56,7 @@ func (e Model) Create(w http.ResponseWriter, r *http.Request) {
 	var ep ModelCreateRequest
 	err = json.Unmarshal(body, &ep)
 	if err != nil {
+		fmt.Println(err)
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
@@ -82,6 +85,78 @@ func (e Model) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(modelResponseBytes)
+
+}
+
+func (e Model) CreateByForm(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var inputPrice float64
+	if r.FormValue("input_price") != "" {
+		inputPriceS := r.FormValue("input_price")
+		inputPrice, err = strconv.ParseFloat(inputPriceS, 32)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Invalid JSON", http.StatusBadRequest)
+			return
+		}
+	} else {
+		inputPrice = 0
+	}
+
+	var outputPrice float64
+	if r.FormValue("output_price") != "" {
+		outputPriceS := r.FormValue("output_price")
+		outputPrice, err = strconv.ParseFloat(outputPriceS, 32)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Invalid JSON", http.StatusBadRequest)
+			return
+		}
+	} else {
+		outputPrice = 0
+	}
+
+	var active bool
+	if r.FormValue("active") != "" {
+		activeS := r.FormValue("active")
+		active, err = strconv.ParseBool(activeS)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Invalid JSON", http.StatusBadRequest)
+			return
+		}
+	} else {
+		active = true
+	}
+	ep := ModelCreateRequest{
+		ModelName:    r.FormValue("model_name"),
+		EndpointName: r.FormValue("endpoint_name"),
+		APIKey:       r.FormValue("api_key"),
+		URLAdress:    r.FormValue("url_address"),
+		InputPrice:   inputPrice,
+		OutputPrice:  outputPrice,
+		Active:       active,
+	}
+
+	if ep.ModelName == "" || ep.URLAdress == "" || ep.EndpointName == "" {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	_, err = e.ModelService.Create(ep.ModelName, ep.EndpointName, ep.APIKey, ep.URLAdress, ep.InputPrice, ep.OutputPrice, ep.Active)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	http.Redirect(w, r, "/ui/models", http.StatusSeeOther)
 
 }
 

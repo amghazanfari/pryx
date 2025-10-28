@@ -2,10 +2,12 @@ package controllers
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 	"net/url"
 
 	"github.com/amghazanfari/pryx/context"
+	"github.com/amghazanfari/pryx/views"
 	"github.com/gin-gonic/gin"
 
 	"github.com/amghazanfari/pryx/models"
@@ -250,9 +252,13 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 func (u Users) ModelList(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		Endpoints *[]models.Endpoint
+		CsrfField template.HTML
 	}
 	var err error
 	data.Endpoints, err = u.EndpointService.List()
+
+	csrfField := r.Context().Value(views.CsrfFieldKey).(string)
+	data.CsrfField = template.HTML(csrfField)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "something went wrong", http.StatusInternalServerError)

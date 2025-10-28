@@ -11,8 +11,11 @@ import (
 
 	"github.com/amghazanfari/pryx/context"
 	"github.com/amghazanfari/pryx/models"
-	"github.com/gorilla/csrf"
 )
+
+type ContextKey string
+
+const CsrfFieldKey ContextKey = "csrfField"
 
 type Template struct {
 	htmlTpl *template.Template
@@ -22,9 +25,9 @@ func ParseFS(fs fs.FS, pattern ...string) (Template, error) {
 	tpl := template.New(pattern[0])
 	tpl = tpl.Funcs(
 		template.FuncMap{
-			"csrfField": func() (template.HTML, error) {
-				return "", fmt.Errorf("csrfField not implemented")
-			},
+			// "csrfField": func() (template.HTML, error) {
+			// 	return "", fmt.Errorf("csrfField not implemented")
+			// },
 			"currentUser": func() (template.HTML, error) {
 				return "", fmt.Errorf("currentUser not implemented")
 			},
@@ -61,9 +64,10 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 	}
 	tpl = tpl.Funcs(
 		template.FuncMap{
-			"csrfField": func() template.HTML {
-				return csrf.TemplateField(r)
-			},
+			// "csrfField": func(c *gin.Context) template.HTML {
+			// 	token := csrf.GetToken(c)
+			// 	return template.HTML(`<input type="hidden" name="_csrf" value="` + token + `">`)
+			// },
 			"currentUser": func() *models.User {
 				return context.User(r.Context())
 			},
@@ -71,7 +75,7 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 				r := []rune(s)
 				return strings.ToUpper(string(r[0]))
 			},
-			"showPrice": func(price float32) string {
+			"showPrice": func(price float64) string {
 				var priceS string
 				if price == 0 {
 					priceS = "free"

@@ -20,7 +20,7 @@ type ModelService struct {
 	DB *sql.DB
 }
 
-func (es *ModelService) Create(modelName, endpointName, apiKey, urlAddress string, input_price, output_price float32, active bool) (*Model, error) {
+func (es *ModelService) Create(modelName, endpointName, apiKey, urlAddress string, input_price, output_price float64, active bool) (*Model, error) {
 	model := Model{
 		Name: modelName,
 	}

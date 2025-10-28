@@ -15,8 +15,8 @@ type Endpoint struct {
 	Object      string    `json:"object"`
 	Timestamp   int64     `json:"created_at"`
 	OwnedBy     string    `json:"owned_by"`
-	InputPrice  float32   `json:"input_price,omitempty"`
-	OutputPrice float32   `json:"output_price,omitempty"`
+	InputPrice  float64   `json:"input_price,omitempty"`
+	OutputPrice float64   `json:"output_price,omitempty"`
 	Active      bool      `json:"active,omitempty"`
 }
 

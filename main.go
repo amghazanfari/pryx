@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"strconv"
@@ -168,11 +169,17 @@ func main() {
 			c.Abort()
 		},
 	}))
+	ui.Use(func(c *gin.Context) {
+		csrfField := `<input type="hidden" name="_csrf" value="` + csrf.GetToken(c) + `">`
+		c.Request = c.Request.WithContext(context.WithValue(c.Request.Context(), views.CsrfFieldKey, csrfField))
+		c.Next()
+	})
+
+	uiGroup := ui.Group("/models")
 	{
-		uiGroup := ui.Group("/models")
-		{
-			uiGroup.GET("/", gin.WrapF(userC.ModelList))
-		}
+		uiGroup.GET("/", gin.WrapF(userC.ModelList))
+
+		uiGroup.POST("/add", gin.WrapF(modelC.CreateByForm))
 	}
 
 	http.ListenAndServe(":8080", r)
