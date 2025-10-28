@@ -6,7 +6,6 @@ require (
 	github.com/gin-contrib/sessions v0.0.0-20190101140330-dc5246754963
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-mail/mail/v2 v2.3.0
-	github.com/gorilla/csrf v1.7.3
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/joho/godotenv v1.5.1
 	github.com/openai/openai-go/v3 v3.4.0
