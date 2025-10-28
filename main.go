@@ -10,10 +10,11 @@ import (
 	"github.com/amghazanfari/pryx/models"
 	"github.com/amghazanfari/pryx/templates"
 	"github.com/amghazanfari/pryx/views"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/gorilla/csrf"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	csrf "github.com/utrack/gin-csrf"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
@@ -118,12 +119,6 @@ func main() {
 		EndpointService:       &endpointService,
 	}
 
-	csrfKey := cfg.CSRF.Key
-	csrfMw := csrf.Protect(
-		[]byte(csrfKey),
-		csrf.Secure(cfg.CSRF.Secure),
-	)
-
 	// setup controllers
 	userC := controllers.Users{
 		UserService:          &userService,
@@ -139,26 +134,46 @@ func main() {
 	}
 	userC.Templates.ModelList = ModelListTpl
 
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(umw.SetUser)
+	r := gin.Default()
+	r.Use(umw.SetUser())
+	r.Static("/static", "./static")
 
-	r.Route("/v1/models", func(r chi.Router) {
-		r.Post("/add", modelC.Create)
-		r.Get("/", modelC.List)
-		r.Get("/{model}", modelC.Retrieve)
-	})
-	r.Route("/v1/endpoints", func(r chi.Router) {
-		r.Get("/", endpointC.List)
-		r.Delete("/", endpointC.Delete)
-	})
-	r.Route("/v1/chat/completions", func(r chi.Router) {
-		r.Get("/", chatCompletionC.Completion)
-	})
-	r.Route("/ui", func(r chi.Router) {
-		r.Use(csrfMw)
-		r.Get("/models", userC.ModelList)
-	})
+	v1 := r.Group("/v1")
+	{
+		modelsGroup := v1.Group("/models")
+		{
+			modelsGroup.POST("/add", gin.WrapF(modelC.Create))
+			modelsGroup.GET("/", gin.WrapF(modelC.List))
+			modelsGroup.GET("/:model", gin.WrapF(modelC.Retrieve))
+		}
+
+		endpointsGroup := v1.Group("/endpoints")
+		{
+			endpointsGroup.GET("/", gin.WrapF(endpointC.List))
+			endpointsGroup.DELETE("/", gin.WrapF(endpointC.Delete))
+		}
+
+		chatGroup := v1.Group("/chat/completions")
+		{
+			chatGroup.GET("/", gin.WrapF(chatCompletionC.Completion))
+		}
+	}
+	ui := r.Group("/ui")
+	store := cookie.NewStore([]byte("secret"))
+	ui.Use(sessions.Sessions("mysession", store))
+	ui.Use(csrf.Middleware(csrf.Options{
+		Secret: cfg.CSRF.Key,
+		ErrorFunc: func(c *gin.Context) {
+			c.String(400, "CSRF token mismatch")
+			c.Abort()
+		},
+	}))
+	{
+		uiGroup := ui.Group("/models")
+		{
+			uiGroup.GET("/", gin.WrapF(userC.ModelList))
+		}
+	}
 
 	http.ListenAndServe(":8080", r)
 

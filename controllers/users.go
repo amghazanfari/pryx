@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/amghazanfari/pryx/context"
+	"github.com/gin-gonic/gin"
 
 	"github.com/amghazanfari/pryx/models"
 )
@@ -128,24 +129,27 @@ type UserMiddleware struct {
 	SessionService *models.SessionService
 }
 
-func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tokenCookie, err := r.Cookie("session") // Read from the new cookie
+func (umw UserMiddleware) SetUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenCookie, err := c.Request.Cookie("session")
 		if err != nil {
-			next.ServeHTTP(w, r)
+			c.Next()
 			return
 		}
-		fmt.Printf("session found for user: %s\n", tokenCookie)
+		fmt.Printf("session found for user: %s\n", tokenCookie.Value)
+
 		user, err := umw.SessionService.User(tokenCookie.Value)
 		if err != nil {
-			next.ServeHTTP(w, r)
+			c.Next()
 			return
 		}
-		ctx := r.Context()
-		ctx = context.WithUser(ctx, user)
-		r = r.WithContext(ctx)
-		next.ServeHTTP(w, r)
-	})
+
+		// Store user in Gin context
+		c.Set("user", user)
+
+		// Continue to next handler
+		c.Next()
+	}
 }
 
 func (umw UserMiddleware) RequireUser(next http.Handler) http.Handler {

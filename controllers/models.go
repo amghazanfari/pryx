@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/amghazanfari/pryx/models"
-	"github.com/go-chi/chi/v5"
 )
 
 type Model struct {
@@ -116,7 +115,7 @@ func (e Model) Retrieve(w http.ResponseWriter, r *http.Request) {
 	var model *models.Model
 
 	w.Header().Set("Content-Type", "application/json")
-	modelName := chi.URLParam(r, "model")
+	modelName := r.URL.Query().Get("model")
 
 	model, err := e.ModelService.Retrieve(modelName)
 	if err != nil {
