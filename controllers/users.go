@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
 	"net/url"
 
@@ -29,6 +31,16 @@ type Users struct {
 	EndpointService      *models.EndpointService
 }
 
+type UserCreateRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type UserCreateResponse struct {
+	Message string      `json:"message"`
+	User    models.User `json:"user"`
+}
+
 func (u Users) SignUp(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		Email string
@@ -38,6 +50,51 @@ func (u Users) SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) Create(w http.ResponseWriter, r *http.Request) {
+
+	// Read the body
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusInternalServerError)
+		return
+	}
+	defer r.Body.Close()
+
+	var userRequest UserCreateRequest
+	err = json.Unmarshal(body, &userRequest)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+	if userRequest.Email == "" || userRequest.Password == "" {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	user, err := u.UserService.Create(userRequest.Email, userRequest.Password)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "something went wrng", http.StatusInternalServerError)
+		return
+	}
+
+	userResponse := UserCreateResponse{
+		Message: "user created succesfully",
+		User:    *user,
+	}
+
+	userResponseBytes, err := json.Marshal(userResponse)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Write(userResponseBytes)
+}
+
+func (u Users) CreateByForm(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

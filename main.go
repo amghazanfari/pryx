@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/amghazanfari/pryx/controllers"
+	"github.com/amghazanfari/pryx/middlewares"
 	"github.com/amghazanfari/pryx/migrations"
 	"github.com/amghazanfari/pryx/models"
 	"github.com/amghazanfari/pryx/templates"
@@ -29,6 +30,9 @@ type config struct {
 	}
 	SERVER struct {
 		Address string
+	}
+	SUPERADMIN struct {
+		Token string
 	}
 }
 
@@ -55,6 +59,8 @@ func loadEnvConfig() (config, error) {
 	cfg.CSRF.Key = "Nk2uFnisr5156l3xeXKYtj4HS4o5CTAV"
 	cfg.CSRF.Secure = false
 	cfg.SERVER.Address = ":8080"
+
+	cfg.SUPERADMIN.Token = "secretSuperToken"
 	return cfg, nil
 }
 
@@ -158,7 +164,14 @@ func main() {
 		{
 			chatGroup.GET("/", gin.WrapF(chatCompletionC.Completion))
 		}
+
+		superAdminGroup := v1.Group("/user")
+		superAdminGroup.Use(middlewares.CheckSuperAdmin(cfg.SUPERADMIN.Token))
+		{
+			superAdminGroup.POST("/signup", gin.WrapF(userC.Create))
+		}
 	}
+
 	ui := r.Group("/ui")
 	store := cookie.NewStore([]byte("secret"))
 	ui.Use(sessions.Sessions("mysession", store))
