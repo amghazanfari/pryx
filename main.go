@@ -170,6 +170,11 @@ func main() {
 		{
 			superAdminGroup.POST("/signup", gin.WrapF(userC.Create))
 		}
+
+		userGroup := v1.Group("/user")
+		{
+			userGroup.POST("/signin", gin.WrapF(userC.Authenticate))
+		}
 	}
 
 	ui := r.Group("/ui")

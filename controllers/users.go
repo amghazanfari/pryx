@@ -41,6 +41,16 @@ type UserCreateResponse struct {
 	User    models.User `json:"user"`
 }
 
+type UserAuthenticateRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type UserAuthenticateResponse struct {
+	Message string         `json:"message"`
+	Session models.Session `json:"session"`
+}
+
 func (u Users) SignUp(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		Email string
@@ -131,6 +141,62 @@ func (u Users) SignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) Authenticate(w http.ResponseWriter, r *http.Request) {
+
+	// Read the body
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusInternalServerError)
+		return
+	}
+	defer r.Body.Close()
+
+	var userRequest UserAuthenticateRequest
+	var userResponse UserAuthenticateResponse
+
+	w.Header().Set("Content-Type", "application/json")
+
+	err = json.Unmarshal(body, &userRequest)
+	if err != nil {
+		fmt.Println(err)
+		userResponse.Message = "Invalid JSON"
+		return
+	}
+	if userRequest.Email == "" || userRequest.Password == "" {
+		fmt.Println(err)
+		userResponse.Message = "Invalid JSON"
+		return
+	}
+
+	user, err := u.UserService.Authenticate(userRequest.Email, userRequest.Password)
+	if err != nil {
+		fmt.Println(err)
+		userResponse.Message = "something went wrng"
+		return
+	}
+
+	session, err := u.SessionService.Create(user.ID)
+
+	if err != nil {
+		fmt.Println(err)
+		userResponse.Message = "something went wrng"
+		return
+	}
+
+	if userResponse.Message == "" {
+		userResponse.Message = "user login succesfully"
+	}
+	userResponse.Session = *session
+
+	userResponseBytes, err := json.Marshal(userResponse)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Write(userResponseBytes)
+}
+
+func (u Users) AuthenticateByForm(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
